@@ -81,12 +81,41 @@
     border: 1px dashed #1879FF;
 }
 
+/*节点的最外层容器*/
+.ef-gateway-container {
+    position: absolute;
+    display: flex;
+    width: 65px;
+    height: 65px;
+    border: 1px solid #E0E3E7;
+    border-radius: 5px;
+    background-color: rgb(218, 136, 243);
+    transform: rotate(45deg);
+}
+
+.ef-gateway-container:hover {
+    /* 设置移动样式*/
+    cursor: move;
+    background-color: #F0F7FF;
+    /*box-shadow: #1879FF 0px 0px 12px 0px;*/
+    background-color: #F0F7FF;
+    border: 1px dashed #94e0c0;
+}
+
 /*节点激活样式*/
 .ef-node-active {
     background-color: #F0F7FF;
     /*box-shadow: #1879FF 0px 0px 12px 0px;*/
     background-color: #F0F7FF;
     border: 1px solid #1879FF;
+}
+
+/*节点激活样式*/
+.ef-gateway-active {
+    background-color: #F0F7FF;
+    /*box-shadow: #1879FF 0px 0px 12px 0px;*/
+    background-color: #F0F7FF;
+    border: 1px solid #349153;
 }
 
 /*节点左侧的竖线*/
