@@ -9,7 +9,7 @@
     <!-- 最左侧的那条竖线 -->
     <div class="ef-node-left" v-show="showNodeLeft"></div>
     <!-- 节点类型的图标 -->
-    <div class="ef-node-left-ico flow-node-drag" v-show="showNodeLeft">
+    <div class="ef-node-left-ico flow-node-drag" >
       <i :class="nodeIcoClass"></i>
     </div>
     <!-- 节点名称 -->
@@ -80,7 +80,7 @@ export default {
       if (this.node.gateway) {
         return {
            color: "#565758",
-          "font-size": "12px",
+          "font-size": "10px",
           "line-height": "32px",
           "margin-left": "0px",
           width: "100px",

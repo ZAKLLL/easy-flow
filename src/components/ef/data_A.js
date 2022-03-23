@@ -1,5 +1,6 @@
 let dataA = {
     name: '流程A',
+    modelId:"modelA",
     nodeList: [
         {
             id: 'nodeA',
@@ -28,10 +29,12 @@ let dataA = {
     ],
     lineList: [{
         from: 'nodeA',
-        to: 'nodeB'
+        to: 'nodeB',
+        id:"ida"
     }, {
         from: 'nodeB',
-        to: 'nodeC'
+        to: 'nodeC',
+        id:"idb"
     }]
 }
 

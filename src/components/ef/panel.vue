@@ -40,9 +40,18 @@
               plain
               round
               icon="el-icon-document"
-              @click="dataInfo"
+              @click="dataInfo(true)"
               size="mini"
               >流程信息</el-button
+            >     
+          <el-button
+              type="info"
+              plain
+              round
+              icon="el-icon-document"
+              @click="dataInfo(false)"
+              size="mini"
+              >流程信息(后端)</el-button
             >
             <el-button
               type="primary"
@@ -272,7 +281,7 @@ export default {
           let from = evt.source.id;
           let to = evt.target.id;
           if (this.loadEasyFlowFinish) {
-            this.data.lineList.push({ from: from, to: to });
+            this.data.lineList.push({ from: from, to: to ,id:this.getUUID()});
           }
         });
 
@@ -555,10 +564,10 @@ export default {
       this.jsPlumb.repaint();
     },
     // 流程数据信息
-    dataInfo() {
+    dataInfo(origin) {
       this.flowInfoVisible = true;
       this.$nextTick(function () {
-        this.$refs.flowInfo.init();
+        this.$refs.flowInfo.init(origin);
       });
     },
     // 加载流程图
