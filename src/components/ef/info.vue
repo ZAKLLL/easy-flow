@@ -86,11 +86,11 @@ export default {
         var lineId = line.id;
         lines.push({
           id: lineId,
-          name: line.name,
+          name: line.label,
           pid: fromId,
           sid: toId,
-          exclusiveOrder: 0,
-          flowConditionExpression: null,
+          exclusiveOrder: line.exclusiveOrder,
+          flowConditionExpression: line.label,
         });
         if (toId in nodeInLineDict) {
           nodeInLineDict[toId].push(lineId);
@@ -127,13 +127,13 @@ export default {
             top: i.top,
             left: i.left,
             ico: i.ico,
-            pids:
+            pid:
               i.id in nodeInLineDict
                 ? nodeInLineDict[i.id].length > 0
                   ? nodeInLineDict[i.id][0]
                   : null
                 : null,
-            sids:
+            sid:
               i.id in nodeOutLineDict
                 ? nodeOutLineDict[i.id].length > 0
                   ? nodeOutLineDict[i.id][0]
@@ -143,7 +143,13 @@ export default {
           nodes.push(node);
         }
       }
-      var modelInfo = { nodes: nodes, lines: lines, gateways: gateways };
+      var modelInfo = {
+        modelId: this.data.modelId,
+        nodes: nodes,
+        lines: lines,
+        gateways: gateways,
+        sourModelInfo: JSON.stringify(this.data).toString(),
+      };
       //   console.log(modelInfo);
       return modelInfo;
     },

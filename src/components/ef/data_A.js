@@ -5,7 +5,7 @@ let dataA = {
         {
             id: 'nodeA',
             name: '流程A-节点A',
-            type: 'task',
+            type: 'START_NODE',
             left: '26px',
             top: '161px',
             ico: 'el-icon-user-solid'
@@ -13,7 +13,7 @@ let dataA = {
         {
             id: 'nodeB',
             name: '流程A-节点B',
-            type: 'task',
+            type: 'SINGLE_USER_TASK_NODE',
             left: '340px',
             top: '161px',
             ico: 'el-icon-goods'
@@ -21,7 +21,7 @@ let dataA = {
         {
             id: 'nodeC',
             name: '流程A-节点C',
-            type: 'task',
+            type: 'END_NODE',
             left: '739px',
             top: '161px',
             ico: 'el-icon-present'
@@ -30,11 +30,13 @@ let dataA = {
     lineList: [{
         from: 'nodeA',
         to: 'nodeB',
-        id:"ida"
+        id:"ida",
+        exclusiveOrder: 0,
     }, {
         from: 'nodeB',
         to: 'nodeC',
-        id:"idb"
+        id:"idb",
+        exclusiveOrder: 0,
     }]
 }
 
