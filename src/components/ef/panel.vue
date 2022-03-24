@@ -43,8 +43,8 @@
               @click="dataInfo(true)"
               size="mini"
               >流程信息</el-button
-            >     
-          <el-button
+            >
+            <el-button
               type="info"
               plain
               round
@@ -53,43 +53,37 @@
               size="mini"
               >流程信息(后端)</el-button
             >
+
+            <el-select v-model="modelId" placeholder="请选择流程" @change="dataReloadByModelId">
+              <el-option
+                v-for="item in options"
+                :key="item.value"
+                :label="item.label"
+                :value="item.value"
+              >
+              </el-option>
+            </el-select>
+
+
             <el-button
               type="primary"
               plain
               round
-              @click="dataReloadA"
-              icon="el-icon-refresh"
+              @click="addNewModel"
+              icon="el-icon-plus"
               size="mini"
-              >切换流程A</el-button
+              >新增</el-button
             >
             <el-button
               type="primary"
               plain
               round
-              @click="dataReloadB"
-              icon="el-icon-refresh"
+              @click="saveModel"
+              icon="el-icon-check"
               size="mini"
-              >切换流程B</el-button
+              >保存</el-button
             >
-            <el-button
-              type="primary"
-              plain
-              round
-              @click="dataReloadC"
-              icon="el-icon-refresh"
-              size="mini"
-              >切换流程C</el-button
-            >
-            <el-button
-              type="primary"
-              plain
-              round
-              @click="dataReloadD"
-              icon="el-icon-refresh"
-              size="mini"
-              >自定义样式</el-button
-            >
-            <el-button
+            <!-- <el-button
               type="primary"
               plain
               round
@@ -97,7 +91,7 @@
               icon="el-icon-refresh"
               size="mini"
               >力导图</el-button
-            >
+            > -->
             <el-button
               type="info"
               plain
@@ -164,11 +158,7 @@ import FlowInfo from "@/components/ef/info";
 import FlowHelp from "@/components/ef/help";
 import FlowNodeForm from "./node_form";
 import lodash from "lodash";
-import { getDataA } from "./data_A";
-import { getDataB } from "./data_B";
-import { getDataC } from "./data_C";
-import { getDataD } from "./data_D";
-import { getDataE } from "./data_E";
+import { getModels } from "./data_models";
 import { ForceDirected } from "./force-directed";
 
 export default {
@@ -196,6 +186,12 @@ export default {
         targetId: undefined,
       },
       zoom: 0.5,
+
+      options: [
+      ],
+      modelId:"",
+      models:{}
+
     };
   },
   // 一些基础配置移动该文件中
@@ -248,8 +244,17 @@ export default {
   mounted() {
     this.jsPlumb = jsPlumb.getInstance();
     this.$nextTick(() => {
-      // 默认加载流程A的数据、在这里可以根据具体的业务返回符合流程数据格式的数据即可
-      this.dataReload(getDataB());
+      // 默认加载models中的第一个流程
+      var models = getModels();
+      this.dataReload(models[0]);
+      this.modelId=models[0].modelId
+      for (var model of models){
+        this.options.push({value:model.modelId,label:model.name})
+        this.models[model.modelId]=model
+      }
+      console.log("options:",this.options)
+      console.log("models:",this.models)
+
     });
   },
   methods: {
@@ -281,7 +286,7 @@ export default {
           let from = evt.source.id;
           let to = evt.target.id;
           if (this.loadEasyFlowFinish) {
-            this.data.lineList.push({ from: from, to: to ,id:this.getUUID()});
+            this.data.lineList.push({ from: from, to: to, id: this.getUUID() });
           }
         });
 
@@ -478,7 +483,7 @@ export default {
         }
         break;
       }
-      console.log("nodeMenu",nodeMenu)
+      console.log("nodeMenu", nodeMenu);
       var node = {
         id: nodeId,
         name: nodeName,
@@ -486,8 +491,8 @@ export default {
         left: left + "px",
         top: top + "px",
         ico: nodeMenu.ico,
-        state: nodeMenu.gateway?"":"success",
-        gateway:nodeMenu.gateway
+        state: nodeMenu.gateway ? "" : "success",
+        gateway: nodeMenu.gateway,
       };
       /**
        * 这里可以进行业务判断、是否能够添加该节点
@@ -587,33 +592,42 @@ export default {
         });
       });
     },
-    // 模拟载入数据dataA
-    dataReloadA() {
-      this.dataReload(getDataA());
+    
+    /**
+     * 根据下拉的数据加载流程图
+     */
+    dataReloadByModelId(){
+      console.log("--------------")
+      this.dataReload(this.models[this.modelId])
     },
-    // 模拟载入数据dataB
-    dataReloadB() {
-      this.dataReload(getDataB());
-    },
-    // 模拟载入数据dataC
-    dataReloadC() {
-      this.dataReload(getDataC());
-    },
-    // 模拟载入数据dataD
-    dataReloadD() {
-      this.dataReload(getDataD());
-    },
+
+    // // 模拟载入数据dataA
+    // dataReloadA() {
+    //   this.dataReload(getDataA());
+    // },
+    // // 模拟载入数据dataB
+    // dataReloadB() {
+    //   this.dataReload(getDataB());
+    // },
+    // // 模拟载入数据dataC
+    // dataReloadC() {
+    //   this.dataReload(getDataC());
+    // },
+    // // 模拟载入数据dataD
+    // dataReloadD() {
+    //   this.dataReload(getDataD());
+    // },
     // 模拟加载数据dataE，自适应创建坐标
-    dataReloadE() {
-      let dataE = getDataE();
-      let tempData = lodash.cloneDeep(dataE);
-      let data = ForceDirected(tempData);
-      this.dataReload(data);
-      this.$message({
-        message: "力导图每次产生的布局是不一样的",
-        type: "warning",
-      });
-    },
+    // dataReloadE() {
+    //   let dataE = getDataE();
+    //   let tempData = lodash.cloneDeep(dataE);
+    //   let data = ForceDirected(tempData);
+    //   this.dataReload(data);
+    //   this.$message({
+    //     message: "力导图每次产生的布局是不一样的",
+    //     type: "warning",
+    //   });
+    // },
     zoomAdd() {
       if (this.zoom >= 1) {
         return;
@@ -657,6 +671,14 @@ export default {
         this.$refs.flowHelp.init();
       });
     },
+    //创建新流程模型
+    addNewModel(){
+
+    },
+    //保存流程模型到后端并更新下拉框
+    saveModel(){
+
+    }
   },
 };
 </script>

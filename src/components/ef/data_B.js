@@ -1,5 +1,6 @@
 let dataB = {
     name: '流程B',
+    modelId:"modelB",
     nodeList: [
         {
             id: 'nodeA',
