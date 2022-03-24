@@ -23,6 +23,7 @@
 import "codemirror/lib/codemirror.css";
 import { codemirror } from "vue-codemirror";
 import nodeVue from "./node.vue";
+import { genBackEndData } from "./utils";
 
 require("codemirror/mode/javascript/javascript.js");
 
@@ -56,102 +57,11 @@ export default {
       //后端数据
       else {
         this.flowJsonData = JSON.stringify(
-          this.genBackEndData(),
+          genBackEndData(this.data),
           null,
           4
         ).toString();
       }
-
-      console.log(this.origin);
-      //   var showData = {
-      //       showJson:this.data,
-      //       modelInfo:this.genBackEndData()
-      //   }
-      //   this.flowJsonData=JSON.stringify(showData, null, 4).toString()
-    },
-
-    genBackEndData() {
-      var nodeList = this.data.nodeList;
-      var lineList = this.data.lineList;
-      var nodeInLineDict = {};
-      var nodeOutLineDict = {};
-      var nodes = [];
-      var lines = [];
-      var gateways = [];
-
-      for (var i = 0; i < lineList.length; i++) {
-        var line = lineList[i];
-        var fromId = line.from;
-        var toId = line.to;
-        var lineId = line.id;
-        lines.push({
-          id: lineId,
-          name: line.label,
-          pid: fromId,
-          sid: toId,
-          exclusiveOrder: line.exclusiveOrder,
-          flowConditionExpression: line.label,
-        });
-        if (toId in nodeInLineDict) {
-          nodeInLineDict[toId].push(lineId);
-        } else {
-          nodeInLineDict[toId] = [lineId];
-        }
-        if (fromId in nodeOutLineDict) {
-          nodeOutLineDict[fromId].push(lineId);
-        } else {
-          nodeOutLineDict[fromId] = [lineId];
-        }
-      }
-
-      for (var j = 0; j < nodeList.length; j++) {
-        var i = nodeList[j];
-        console.log(i);
-        if (i.gateway) {
-          var gateway = {
-            id: i.id,
-            name: i.name,
-            type: i.type,
-            top: i.top,
-            left: i.left,
-            ico: i.ico,
-            pids: nodeInLineDict[i.id],
-            sids: nodeOutLineDict[i.id],
-          };
-          gateways.push(gateway);
-        } else {
-          var node = {
-            id: i.id,
-            name: i.name,
-            type: i.type,
-            top: i.top,
-            left: i.left,
-            ico: i.ico,
-            pid:
-              i.id in nodeInLineDict
-                ? nodeInLineDict[i.id].length > 0
-                  ? nodeInLineDict[i.id][0]
-                  : null
-                : null,
-            sid:
-              i.id in nodeOutLineDict
-                ? nodeOutLineDict[i.id].length > 0
-                  ? nodeOutLineDict[i.id][0]
-                  : null
-                : null,
-          };
-          nodes.push(node);
-        }
-      }
-      var modelInfo = {
-        modelId: this.data.modelId,
-        nodes: nodes,
-        lines: lines,
-        gateways: gateways,
-        sourModelInfo: JSON.stringify(this.data).toString(),
-      };
-      //   console.log(modelInfo);
-      return modelInfo;
     },
   },
 };

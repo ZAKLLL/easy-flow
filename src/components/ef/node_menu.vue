@@ -119,7 +119,7 @@ export default {
           children: [
             {
               id: "21",
-              type: "EXCLUSIVE_gateway",
+              type: "EXCLUSIVE_GATEWAY",
               name: "排他网关",
               ico: "el-icon-arrow-right",
               gateway: true,
@@ -128,7 +128,7 @@ export default {
             },
             {
               id: "22",
-              type: "PARALLEL_gateway",
+              type: "EXCLUSIVE_GATEWAY",
               name: "并行网关",
               ico: "el-icon-d-arrow-right",
               gateway: true,

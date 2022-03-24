@@ -170,10 +170,9 @@ import FlowInfo from "@/components/ef/info";
 import FlowHelp from "@/components/ef/help";
 import FlowNodeForm from "./node_form";
 import lodash from "lodash";
-import { getModels } from "./data_models";
-import { persistModel } from "./data_models";
 import { ForceDirected } from "./force-directed";
-import axios from 'axios';
+import { apiGetModels, apiSaveModel } from "./request";
+import { genBackEndData } from "./utils";
 
 export default {
   data() {
@@ -256,27 +255,29 @@ export default {
     },
   },
   mounted() {
-    axios
-      .get("www.baidu.com", {
-        
-      })
-      .then(function (res) {
-        console.log("baidu",res)
-      })
-      .catch(function (error) {
-        console.log(error);
-      });
+    // axios
+    //   .get("www.baidu.com", {
+
+    //   })
+    //   .then(function (res) {
+    //     console.log("baidu",res)
+    //   })
+    //   .catch(function (error) {
+    //     console.log(error);
+    //   });
 
     this.jsPlumb = jsPlumb.getInstance();
     this.$nextTick(() => {
       // 默认加载models中的第一个流程
-      var models = getModels();
-      this.dataReload(models[0]);
-      this.modelId = models[0].modelId;
-      for (var model of models) {
-        this.options.push({ value: model.modelId, label: model.name });
-        this.models[model.modelId] = model;
-      }
+      this.getModels().then((models) => {
+        this.dataReload(models[0]);
+        this.modelId = models[0].modelId;
+        for (var model of models) {
+          this.options.push({ value: model.modelId, label: model.name });
+          this.models[model.modelId] = model;
+        }
+        console.log("options", this.options);
+      });
     });
   },
   methods: {
@@ -599,7 +600,6 @@ export default {
     },
     // 加载流程图
     dataReload(data) {
-      console.log("dataReload", data);
       this.easyFlowVisible = false;
       this.data.nodeList = [];
       this.data.lineList = [];
@@ -624,33 +624,6 @@ export default {
       this.dataReload(this.models[this.modelId]);
     },
 
-    // // 模拟载入数据dataA
-    // dataReloadA() {
-    //   this.dataReload(getDataA());
-    // },
-    // // 模拟载入数据dataB
-    // dataReloadB() {
-    //   this.dataReload(getDataB());
-    // },
-    // // 模拟载入数据dataC
-    // dataReloadC() {
-    //   this.dataReload(getDataC());
-    // },
-    // // 模拟载入数据dataD
-    // dataReloadD() {
-    //   this.dataReload(getDataD());
-    // },
-    // 模拟加载数据dataE，自适应创建坐标
-    // dataReloadE() {
-    //   let dataE = getDataE();
-    //   let tempData = lodash.cloneDeep(dataE);
-    //   let data = ForceDirected(tempData);
-    //   this.dataReload(data);
-    //   this.$message({
-    //     message: "力导图每次产生的布局是不一样的",
-    //     type: "warning",
-    //   });
-    // },
     zoomAdd() {
       if (this.zoom >= 1) {
         return;
@@ -705,21 +678,44 @@ export default {
     //保存流程模型到后端并更新下拉框
     saveModel() {
       var newModel = JSON.parse(JSON.stringify(this.data));
-      if (
-        this.data.modelId != undefined &&
-        this.data.modelId != null &&
-        this.data.modelId.length > 0
-      ) {
-        this.$message.success("更新成功");
-      } else {
-        newModel["modelId"] = this.getUUID();
-        this.options.push({ value: newModel.modelId, label: newModel.name });
-        this.$message.success("新增成功");
+      if (this.data["modelId"] == undefined) {
+        if (this.newModelName.length == 0) {
+          this.$message.error("输入正确的名称");
+          return;
+        }
+        newModel["name"] = this.newModelName;
       }
-      newModel["name"] = this.newModelName;
-      //todo 保存到后端
-      // persistModel(newModel);
-      this.models[newModel["modelId"]] = newModel;
+      this.persistModel(newModel).then((newModel) => {
+        if (this.data["modelId"] == undefined) {
+          this.options.push({ value: newModel.modelId, label: newModel.name });
+        }
+        this.models[newModel["modelId"]] = newModel;
+      });
+    },
+
+    async getModels() {
+      var models = [];
+      var res = await apiGetModels();
+      var modelConfigs = res.data.data.records;
+      for (var item of modelConfigs) {
+        var model = JSON.parse(item.tmpModel);
+        model.modelId = item.id;
+        models.push(model);
+      }
+      return models;
+    },
+
+    async persistModel(model) {
+      console.log("---------", model);
+      var res = await apiSaveModel(genBackEndData(model));
+      var data = res.data;
+      if (data.status == "0") {
+        model["modelId"] = data.data.id;
+        this.$message.success("新增/更新成功");
+      } else {
+        this.$message.error(data.data);
+      }
+      return model;
     },
   },
 };
