@@ -173,6 +173,7 @@ import lodash from "lodash";
 import { getModels } from "./data_models";
 import { persistModel } from "./data_models";
 import { ForceDirected } from "./force-directed";
+import axios from 'axios';
 
 export default {
   data() {
@@ -255,6 +256,17 @@ export default {
     },
   },
   mounted() {
+    axios
+      .get("www.baidu.com", {
+        
+      })
+      .then(function (res) {
+        console.log("baidu",res)
+      })
+      .catch(function (error) {
+        console.log(error);
+      });
+
     this.jsPlumb = jsPlumb.getInstance();
     this.$nextTick(() => {
       // 默认加载models中的第一个流程
@@ -699,7 +711,6 @@ export default {
         this.data.modelId.length > 0
       ) {
         this.$message.success("更新成功");
-
       } else {
         newModel["modelId"] = this.getUUID();
         this.options.push({ value: newModel.modelId, label: newModel.name });
