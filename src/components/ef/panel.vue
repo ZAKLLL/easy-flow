@@ -54,7 +54,11 @@
               >流程信息(后端)</el-button
             >
 
-            <el-select v-model="modelId" placeholder="请选择流程" @change="dataReloadByModelId">
+            <el-select
+              v-model="modelId"
+              placeholder="请选择流程"
+              @change="dataReloadByModelId"
+            >
               <el-option
                 v-for="item in options"
                 :key="item.value"
@@ -64,16 +68,24 @@
               </el-option>
             </el-select>
 
-
             <el-button
               type="primary"
               plain
               round
-              @click="addNewModel"
+              @click="addModelVisible = true"
               icon="el-icon-plus"
               size="mini"
               >新增</el-button
             >
+
+            <el-dialog title="新增模型" :visible.sync="addModelVisible">
+              <el-input v-model="newModelName" autocomplete="off"></el-input>
+              <div slot="footer" class="dialog-footer">
+                <el-button @click="addModelVisible = false">取 消</el-button>
+                <el-button type="primary" @click="addNewModel">确 定</el-button>
+              </div>
+            </el-dialog>
+
             <el-button
               type="primary"
               plain
@@ -159,6 +171,7 @@ import FlowHelp from "@/components/ef/help";
 import FlowNodeForm from "./node_form";
 import lodash from "lodash";
 import { getModels } from "./data_models";
+import { persistModel } from "./data_models";
 import { ForceDirected } from "./force-directed";
 
 export default {
@@ -187,11 +200,11 @@ export default {
       },
       zoom: 0.5,
 
-      options: [
-      ],
-      modelId:"",
-      models:{}
-
+      options: [],
+      modelId: "",
+      models: {},
+      addModelVisible: false,
+      newModelName: "",
     };
   },
   // 一些基础配置移动该文件中
@@ -247,14 +260,11 @@ export default {
       // 默认加载models中的第一个流程
       var models = getModels();
       this.dataReload(models[0]);
-      this.modelId=models[0].modelId
-      for (var model of models){
-        this.options.push({value:model.modelId,label:model.name})
-        this.models[model.modelId]=model
+      this.modelId = models[0].modelId;
+      for (var model of models) {
+        this.options.push({ value: model.modelId, label: model.name });
+        this.models[model.modelId] = model;
       }
-      console.log("options:",this.options)
-      console.log("models:",this.models)
-
     });
   },
   methods: {
@@ -577,6 +587,7 @@ export default {
     },
     // 加载流程图
     dataReload(data) {
+      console.log("dataReload", data);
       this.easyFlowVisible = false;
       this.data.nodeList = [];
       this.data.lineList = [];
@@ -592,13 +603,13 @@ export default {
         });
       });
     },
-    
+
     /**
      * 根据下拉的数据加载流程图
      */
-    dataReloadByModelId(){
-      console.log("--------------")
-      this.dataReload(this.models[this.modelId])
+    dataReloadByModelId() {
+      console.log("models", this.models);
+      this.dataReload(this.models[this.modelId]);
     },
 
     // // 模拟载入数据dataA
@@ -672,13 +683,33 @@ export default {
       });
     },
     //创建新流程模型
-    addNewModel(){
-
+    addNewModel() {
+      this.addModelVisible = false;
+      this.data = {};
+      this.data["name"] = this.newModelName;
+      this.modelId = undefined;
+      this.dataReload(this.data);
     },
     //保存流程模型到后端并更新下拉框
-    saveModel(){
+    saveModel() {
+      var newModel = JSON.parse(JSON.stringify(this.data));
+      if (
+        this.data.modelId != undefined &&
+        this.data.modelId != null &&
+        this.data.modelId.length > 0
+      ) {
+        this.$message.success("更新成功");
 
-    }
+      } else {
+        newModel["modelId"] = this.getUUID();
+        this.options.push({ value: newModel.modelId, label: newModel.name });
+        this.$message.success("新增成功");
+      }
+      newModel["name"] = this.newModelName;
+      //todo 保存到后端
+      // persistModel(newModel);
+      this.models[newModel["modelId"]] = newModel;
+    },
   },
 };
 </script>

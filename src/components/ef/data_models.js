@@ -11,5 +11,6 @@ let models = [
 export function getModels () {
     return models
 }
-
-
+export function persistModel(model){
+    models.push(model)
+}
