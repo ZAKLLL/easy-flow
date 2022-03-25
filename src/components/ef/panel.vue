@@ -298,7 +298,7 @@ export default {
           this.activeElement.type = "line";
           this.activeElement.sourceId = conn.sourceId;
           this.activeElement.targetId = conn.targetId;
-          this.$refs.nodeForm.lineInit({
+          this.$refs.nodeForm.lineInit(this.data,{
             from: conn.sourceId,
             to: conn.targetId,
             label: conn.getLabel(),
@@ -395,7 +395,7 @@ export default {
       });
     },
     // 设置连线条件
-    setLineLabel(from, to, label) {
+    setLineLabel(from, to, label,exclusiveOrder) {
       var conn = this.jsPlumb.getConnections({
         source: from,
         target: to,
@@ -412,6 +412,7 @@ export default {
       this.data.lineList.forEach(function (line) {
         if (line.from == from && line.to == to) {
           line.label = label;
+          line.exclusiveOrder=exclusiveOrder;
         }
       });
     },
@@ -677,6 +678,7 @@ export default {
     },
     //保存流程模型到后端并更新下拉框
     saveModel() {
+      //deepCopy
       var newModel = JSON.parse(JSON.stringify(this.data));
       if (this.data["modelId"] == undefined) {
         if (this.newModelName.length == 0) {
@@ -690,6 +692,8 @@ export default {
           this.options.push({ value: newModel.modelId, label: newModel.name });
         }
         this.models[newModel["modelId"]] = newModel;
+      }).catch(err=>{
+                this.$message.error("网络异常");
       });
     },
 
@@ -706,7 +710,6 @@ export default {
     },
 
     async persistModel(model) {
-      console.log("---------", model);
       var res = await apiSaveModel(genBackEndData(model));
       var data = res.data;
       if (data.status == "0") {

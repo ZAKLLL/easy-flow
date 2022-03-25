@@ -49,7 +49,6 @@ export default {
     init(origin) {
       this.dialogVisible = true;
       this.origin = origin;
-
       //前端源数据
       if (origin) {
         this.flowJsonData = JSON.stringify(this.data, null, 4).toString();
