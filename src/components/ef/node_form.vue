@@ -24,6 +24,14 @@
           <el-form-item label="ico图标">
             <el-input v-model="node.ico"></el-input>
           </el-form-item>
+
+          <el-form-item label="网关到达" v-show="node.gateway">
+            <el-input
+              onkeyup="value=value.replace(/[^\d]/g,'')"
+              v-model="node.arrivalCnt"
+            ></el-input>
+          </el-form-item>
+
           <el-form-item label="状态">
             <el-select v-model="node.state" placeholder="请选择">
               <el-option
@@ -77,7 +85,6 @@
 
 <script>
 import { cloneDeep } from "lodash";
-
 export default {
   data() {
     return {
@@ -142,6 +149,7 @@ export default {
         this.line.label,
         this.line.exclusiveOrder
       );
+      //   this.$emit("$message.succss","保存成功")
     },
     save() {
       this.data.nodeList.filter((node) => {
@@ -151,9 +159,11 @@ export default {
           node.top = this.node.top;
           node.ico = this.node.ico;
           node.state = this.node.state;
+          node.arrivalCnt = this.node.arrivalCnt;
           this.$emit("repaintEverything");
         }
       });
+      //   this.$message.succss("保存成功")
     },
     nodeReset() {
       this.data.nodeList.filter((node) => {
@@ -161,13 +171,15 @@ export default {
           this.node = cloneDeep(node);
         }
       });
+      //   this.$message.succss("重置成功")
     },
     lineReset() {
       this.data.lineList.filter((line) => {
-        if (line.from === this.line.from && line.to == this.line.top) {
+        if (line.from == this.line.from && line.to == this.line.to) {
           this.line = cloneDeep(line);
         }
       });
+      //   this.$message.succss("重置成功")
     },
   },
 };

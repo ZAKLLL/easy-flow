@@ -74,6 +74,7 @@ export function genBackEndData(data) {
           top: i.top,
           left: i.left,
           ico: i.ico,
+          arrivalCnt:i.arrivalCnt,
           pids: nodeInLineDict[i.id],
           sids: nodeOutLineDict[i.id],
         };
