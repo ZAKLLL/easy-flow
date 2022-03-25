@@ -72,7 +72,6 @@ export default {
       }
     },
     showNodeLeft() {
-      console.log("showNodeLeft", this.node.gateway);
       return !this.node.gateway;
     },
 

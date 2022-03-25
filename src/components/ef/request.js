@@ -27,5 +27,14 @@ export function apiGetModels() {
     method:'GET'
   })
 }
+export function apiDeploy(modelId) {
+  return service({
+    url: 'model/deploy',
+    params:{
+      modelId:modelId
+    },
+    method:'GET'
+  })
+}
 
 

@@ -95,6 +95,16 @@
               size="mini"
               >保存</el-button
             >
+            <el-button
+              type="primary"
+              plain
+              round
+              @click="deploy"
+              :disabled="(modelId != null && modelId.length > 0) ? false : true"
+              icon="el-icon-s-check"
+              size="mini"
+              >部署</el-button
+            >
             <!-- <el-button
               type="primary"
               plain
@@ -171,7 +181,7 @@ import FlowHelp from "@/components/ef/help";
 import FlowNodeForm from "./node_form";
 import lodash from "lodash";
 import { ForceDirected } from "./force-directed";
-import { apiGetModels, apiSaveModel } from "./request";
+import { apiGetModels, apiSaveModel,apiDeploy } from "./request";
 import { genBackEndData } from "./utils";
 
 export default {
@@ -272,11 +282,17 @@ export default {
       this.getModels().then((models) => {
         this.dataReload(models[0]);
         this.modelId = models[0].modelId;
+
+        // console.log(
+        //   "cccccc",
+        //   this.modelId,
+        //   "-",
+        //   this.modelId.length > 0 ? "true" : "false"
+        // );
         for (var model of models) {
           this.options.push({ value: model.modelId, label: model.name });
           this.models[model.modelId] = model;
         }
-        console.log("options", this.options);
       });
     });
   },
@@ -298,7 +314,7 @@ export default {
           this.activeElement.type = "line";
           this.activeElement.sourceId = conn.sourceId;
           this.activeElement.targetId = conn.targetId;
-          this.$refs.nodeForm.lineInit(this.data,{
+          this.$refs.nodeForm.lineInit(this.data, {
             from: conn.sourceId,
             to: conn.targetId,
             label: conn.getLabel(),
@@ -395,7 +411,7 @@ export default {
       });
     },
     // 设置连线条件
-    setLineLabel(from, to, label,exclusiveOrder) {
+    setLineLabel(from, to, label, exclusiveOrder) {
       var conn = this.jsPlumb.getConnections({
         source: from,
         target: to,
@@ -412,7 +428,7 @@ export default {
       this.data.lineList.forEach(function (line) {
         if (line.from == from && line.to == to) {
           line.label = label;
-          line.exclusiveOrder=exclusiveOrder;
+          line.exclusiveOrder = exclusiveOrder;
         }
       });
     },
@@ -673,8 +689,21 @@ export default {
       this.addModelVisible = false;
       this.data = {};
       this.data["name"] = this.newModelName;
-      this.modelId = undefined;
+      this.modelId = null;
       this.dataReload(this.data);
+    },
+
+    deploy() {
+      apiDeploy(this.modelId).then(res=>{
+        var data = res.data;
+        if (data.status == "0") {
+          this.$message.success("部署成功");
+        } else {
+          this.$message.error(data.data);
+        }
+      }).catch(err=>{
+          this.$message.error("服务异常");
+      })
     },
     //保存流程模型到后端并更新下拉框
     saveModel() {
@@ -687,14 +716,21 @@ export default {
         }
         newModel["name"] = this.newModelName;
       }
-      this.persistModel(newModel).then((newModel) => {
-        if (this.data["modelId"] == undefined) {
-          this.options.push({ value: newModel.modelId, label: newModel.name });
-        }
-        this.models[newModel["modelId"]] = newModel;
-      }).catch(err=>{
-                this.$message.error("网络异常");
-      });
+      this.persistModel(newModel)
+        .then((newModel) => {
+          if (this.data["modelId"] == undefined) {
+            this.options.push({
+              value: newModel.modelId,
+              label: newModel.name,
+            });
+          }
+          this.models[newModel["modelId"]] = newModel;
+          this.modelId = newModel.modelId;
+          this.data = newModel;
+        })
+        .catch((err) => {
+          this.$message.error("网络异常");
+        });
     },
 
     async getModels() {
@@ -721,5 +757,6 @@ export default {
       return model;
     },
   },
+  
 };
 </script>
